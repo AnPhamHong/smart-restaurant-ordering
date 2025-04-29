@@ -13,8 +13,22 @@ import { useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { useLoginMutation } from "@/queries/useAuth";
+import { toast } from "sonner";
+import { handleErrorApi } from "@/lib/utils";
+// {
+//   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJPd25lciIsInRva2VuVHlwZSI6IkFjY2Vzc1Rva2VuIiwiaWF0IjoxNzQ1OTM4MjM2LCJleHAiOjE3NDU5NDE4MzZ9.LffuMbOMc5GrbbfMIHCJrwAJStu4TKFh6LgtVqoRNuw",
+//   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJPd25lciIsInRva2VuVHlwZSI6IlJlZnJlc2hUb2tlbiIsImlhdCI6MTc0NTkzODIzNiwiZXhwIjoxNzQ2MDI0NjM2fQ.bGZijQjgbDNbfq5bcFPToHWgnMZ0iqF_Ti-kwyw_lSg",
+//   "account": {
+//       "id": 1,
+//       "name": "Được Hello 1",
+//       "email": "admin@order.com",
+//       "role": "Owner",
+//       "avatar": null
+//   }
+// }
 export default function LoginForm() {
+  const loginMutation = useLoginMutation();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -22,6 +36,16 @@ export default function LoginForm() {
       password: "",
     },
   });
+
+  const onSubmit = async (data: LoginBodyType) => {
+    try {
+      const result = await loginMutation.mutateAsync(data);
+      console.log(result);
+      toast.success(result.payload.message);
+    } catch (error) {
+      handleErrorApi({ error, setError: form.setError });
+    }
+  };
 
   return (
     <Card className="mx-auto max-w-md w-full md:w-2/3">
@@ -36,6 +60,9 @@ export default function LoginForm() {
           <form
             className="space-y-2 max-w-[600px] md:max-w-full flex-shrink-0"
             noValidate
+            onSubmit={form.handleSubmit(onSubmit, (err) => {
+              console.warn(err);
+            })}
           >
             <div className="grid gap-4">
               <FormField

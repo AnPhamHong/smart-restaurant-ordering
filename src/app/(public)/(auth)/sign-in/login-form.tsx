@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "@/queries/useAuth";
 import { toast } from "sonner";
 import { handleErrorApi } from "@/lib/utils";
+import { redirect, useRouter } from "next/navigation";
 // {
 //   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJPd25lciIsInRva2VuVHlwZSI6IkFjY2Vzc1Rva2VuIiwiaWF0IjoxNzQ1OTM4MjM2LCJleHAiOjE3NDU5NDE4MzZ9.LffuMbOMc5GrbbfMIHCJrwAJStu4TKFh6LgtVqoRNuw",
 //   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJPd25lciIsInRva2VuVHlwZSI6IlJlZnJlc2hUb2tlbiIsImlhdCI6MTc0NTkzODIzNiwiZXhwIjoxNzQ2MDI0NjM2fQ.bGZijQjgbDNbfq5bcFPToHWgnMZ0iqF_Ti-kwyw_lSg",
@@ -28,6 +29,8 @@ import { handleErrorApi } from "@/lib/utils";
 //   }
 // }
 export default function LoginForm() {
+  const router = useRouter();
+
   const loginMutation = useLoginMutation();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -40,8 +43,8 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginBodyType) => {
     try {
       const result = await loginMutation.mutateAsync(data);
-      console.log(result);
       toast.success(result.payload.message);
+      router.push("/");
     } catch (error) {
       handleErrorApi({ error, setError: form.setError });
     }
